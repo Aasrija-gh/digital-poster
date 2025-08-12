@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Digital Clock & Countdown Timer</title>
+<style>
+  :root{
+    --bg1: #ff6b6b;
+    --bg2: #7f5aff;
+    --card-radius: 18px;
+    --glass: rgba(255,255,255,0.08);
+    --accent: #ffd166;
+    --dark: #0e1116;
+    --muted: rgba(255,255,255,0.85);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+
+  html,body{
+    height:100%;
+    margin:0;
+    background: linear-gradient(135deg,#ff7a66 0%, #ffb26b 30%, #8b6ff8 100%);
+    color:var(--dark);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    padding:32px;
+  }
+
+  .container{
+    max-width:1100px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns: 1fr 420px;
+    grid-gap:28px;
+    align-items:start;
+  }
+
+  header{
+    grid-column:1 / -1;
+    display:flex;
+    align-items:center;
+    gap:18px;
+  }
+  .logo{
+    width:72px;
+    height:72px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#fff 0,#fff0 60%);
+    display:grid;
+    place-items:center;
+    box-shadow:0 6px 18px rgba(0,0,0,0.12), inset 0 -6px 20px rgba(255,255,255,0.12);
+    color:#8b6ff8;
+    font-weight:700;
+    font-size:28px;
+  }
+  h1{
+    margin:0;
+    font-size:36px;
+    letter-spacing:0.5px;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  }
+  p.lead{
+    margin:6px 0 0 0;
+    color:rgba(255,255,255,0.95);
+    opacity:0.95;
+  }
+
+  /* Left column cards */
+  .left{
+    display:grid;
+    grid-template-rows: repeat(3, auto);
+    gap:18px;
+  }
+  .card{
+    border-radius: var(--card-radius);
+    padding:22px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    backdrop-filter: blur(6px);
+  }
+
+  .intro{
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.06));
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .features{
+    background: linear-gradient(180deg,#f7c948, #f0b330);
+    color:#2b2b2b;
+  }
+
+  .technologies{
+    background: linear-gradient(180deg,#3ea4ff,#2a8ddf);
+  }
+
+  .card h2{
+    margin-top:0;
+    margin-bottom:10px;
+    font-size:18px;
+    letter-spacing:0.6px;
+    text-transform:uppercase;
+    font-weight:700;
+  }
+  .card ul{
+    margin:8px 0 0 0;
+    padding-left:18px;
+  }
+  .feature-row{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:10px;
+  }
+  .check{
+    min-width:26px;
+    height:26px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.18);
+    display:grid;
+    place-items:center;
+    font-weight:700;
+  }
+
+  /* Right column (clock/timer UI and code structure poster card) */
+  .right{
+    display:grid;
+    gap:18px;
+  }
+
+  .ui-card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    border-radius: 18px;
+    padding:22px;
+    color:#fff;
+  }
+
+  /* Live clock display */
+  .clock{
+    background: #03121a;
+    padding:18px 22px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .clock .time{
+    font-family: 'Courier New', monospace;
+    font-size:44px;
+    letter-spacing:2px;
+    color:#2ee6a0;
+  }
+  .clock .date{
+    font-size:14px;
+    color: #9ad7bf;
+    opacity:0.9;
+  }
+
+  /* Timer controls */
+  .timer-controls{
+    display:flex;
+    gap:12px;
+    margin-top:16px;
+    align-items:center;
+  }
+  .inputs{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  input[type="number"]{
+    width:74px;
+    padding:8px 10px;
+    border-radius:8px;
+    border: none;
+    outline:none;
+    font-size:16px;
+  }
+  button{
+    padding:10px 14px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    font-weight:700;
+    box-shadow:0 6px 18px rgba(0,0,0,0.12);
+  }
+  .btn-start{ background: linear-gradient(180deg,#38d39f,#18c07f); color:white; }
+  .btn-stop{ background: linear-gradient(180deg,#ff8a8a,#ff5a5a); color:white; }
+  .btn-reset{ background:linear-gradient(180deg,#ffffff,#f0f0f0); color:#222; }
+
+  .countdown-display{
+    margin-top:16px;
+    font-family: 'Courier New', monospace;
+    font-size:34px;
+    text-align:center;
+    padding:12px 0;
+    border-radius:8px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.55), rgba(0,0,0,0.4));
+    color:#ffd166;
+    letter-spacing:2px;
+  }
+
+  .applications{
+    background: linear-gradient(180deg,#24d39a,#15c3a2);
+    color:#04312b;
+  }
+
+  /* small screens */
+  @media (max-width:980px){
+    .container{
+      grid-template-columns: 1fr;
+    }
+    .right{ order: -1; }
+  }
+</style>
+</head>
+<body>
+  <div class="container" role="main">
+    <header>
+      <div class="logo" aria-hidden="true">⏱️</div>
+      <div>
+        <h1>Digital Clock &amp; Countdown Timer</h1>
+        <p class="lead">A simple, interactive time-tracking web app</p>
+      </div>
+    </header>
+
+    <section class="left">
+      <article class="card intro" aria-labelledby="intro-title">
+        <h2 id="intro-title">Introduction</h2>
+        <p>Time management is an essential skill in daily life. This project combines:</p>
+        <ul>
+          <li>Real-time Digital Clock</li>
+          <li>Customizable Countdown Timer</li>
+          <li>Built entirely with HTML, CSS and JavaScript — no frameworks needed</li>
+        </ul>
+      </article>
+
+      <article class="card features" aria-labelledby="features-title">
+        <h2 id="features-title">Features</h2>
+        <div class="feature-row"><div class="check">✓</div><div><strong>Live Clock</strong> — displays system time, updated every second</div></div>
+        <div class="feature-row"><div class="check">✓</div><div><strong>Custom Timer</strong> — user sets minutes and seconds</div></div>
+        <div class="feature-row"><div class="check">✓</div><div><strong>Control Buttons</strong> — Start, Stop, Reset</div></div>
+        <div class="feature-row"><div class="check">✓</div><div><strong>Alarm Sound</strong> — alerts when countdown ends</div></div>
+      </article>
+
+      <article class="card technologies" aria-labelledby="tech-title">
+        <h2 id="tech-title">Technologies Used</h2>
+        <ul>
+          <li>HTML</li>
+          <li>CSS</li>
+          <li>JavaScript</li>
+          <li>Web Audio API (alarm)</li>
+        </ul>
+      </article>
+    </section>
+
+    <aside class="right">
+      <div class="ui-card" aria-labelledby="ui-title">
+        <h2 id="ui-title">How it works</h2>
+
+        <!-- Live clock -->
+        <div class="clock" aria-live="polite">
+          <div>
+            <div class="time" id="liveTime">--:--:--</div>
+            <div class="date" id="liveDate">—</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:700">Digital Clock</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.65);margin-top:6px;">Updates every 1000 ms</div>
+          </div>
+        </div>
+
+        <!-- Countdown timer -->
+        <div style="margin-top:18px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-weight:700">Countdown Timer</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.85);">Enter minutes and seconds</div>
+          </div>
+
+          <div class="timer-controls" role="group" aria-label="Timer controls">
+            <div class="inputs">
+              <label>
+                <span style="display:block;font-size:12px;color:rgba(255,255,255,0.9)">Minutes</span>
+                <input id="minutes" type="number" min="0" max="999" value="0" inputmode="numeric" />
+              </label>
+              <label>
+                <span style="display:block;font-size:12px;color:rgba(255,255,255,0.9)">Seconds</span>
+                <input id="seconds" type="number" min="0" max="59" value="30" inputmode="numeric" />
+              </label>
+            </div>
+
+            <div style="margin-left:auto; display:flex; gap:8px;">
+              <button id="startBtn" class="btn-start">Start</button>
+              <button id="stopBtn" class="btn-stop" disabled>Stop</button>
+              <button id="resetBtn" class="btn-reset">Reset</button>
+            </div>
+          </div>
+
+          <div class="countdown-display" id="countDisplay" aria-live="polite">00:30</div>
+        </div>
+      </div>
+
+      <div class="card applications" aria-labelledby="apps-title">
+        <h2 id="apps-title">Applications</h2>
+        <ul>
+          <li>Personal productivity tool</li>
+          <li>Classroom time management</li>
+          <li>Workout & meditation timer</li>
+          <li>Cooking assistant</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+<script>
+/*
+  Digital Clock & Countdown Timer
+  - Live clock updates every second
+  - Custom countdown (minutes + seconds)
+  - Start / Stop / Reset controls
+  - Alarm uses Web Audio API (no external files)
+*/
+
+(() => {
+  // --- Clock ---
+  const liveTime = document.getElementById('liveTime');
+  const liveDate = document.getElementById('liveDate');
+
+  function pad(n) { return n.toString().padStart(2, '0'); }
+
+  function updateClock() {
+    const now = new Date();
+    const hh = pad(now.getHours());
+    const mm = pad(now.getMinutes());
+    const ss = pad(now.getSeconds());
+    liveTime.textContent = `${hh}:${mm}:${ss}`;
+    // localized date
+    liveDate.textContent = now.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // --- Countdown Timer ---
+  const minutesInput = document.getElementById('minutes');
+  const secondsInput = document.getElementById('seconds');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const countDisplay = document.getElementById('countDisplay');
+
+  let remainingMs = 0;        // milliseconds remaining
+  let endTime = null;        // timestamp when timer should end
+  let timerInterval = null;
+  let isRunning = false;
+  let initialMs = 0;
+
+  // Helper: format ms to mm:ss
+  function formatMs(ms) {
+    if (ms < 0) ms = 0;
+    const totalSec = Math.ceil(ms / 1000);
+    const mm = Math.floor(totalSec / 60);
+    const ss = totalSec % 60;
+    return `${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+  }
+
+  function updateCountdownDisplay() {
+    countDisplay.textContent = formatMs(remainingMs);
+  }
+
+  function parseInputsToMs() {
+    // careful arithmetic: convert minutes and seconds to total ms
+    const m = Math.max(0, Math.floor(Number(minutesInput.value) || 0));
+    const s = Math.max(0, Math.floor(Number(secondsInput.value) || 0));
+    const totalSeconds = m * 60 + s;
+    return totalSeconds * 1000;
+  }
+
+  function enableControls(running) {
+    isRunning = running;
+    startBtn.disabled = running;
+    stopBtn.disabled = !running;
+    minutesInput.disabled = running;
+    secondsInput.disabled = running;
+  }
+
+  function startTimer() {
+    if (isRunning) return;
+    remainingMs = parseInputsToMs();
+    if (remainingMs <= 0) {
+      // nothing to do
+      flashZero();
+      return;
+    }
+    initialMs = remainingMs;
+    // Use absolute end time to minimize drift
+    endTime = Date.now() + remainingMs;
+    updateCountdownDisplay();
+    enableControls(true);
+
+    timerInterval = setInterval(() => {
+      remainingMs = endTime - Date.now();
+
+      if (remainingMs <= 0) {
+        remainingMs = 0;
+        updateCountdownDisplay();
+        stopInternal();
+        fireAlarm();
+      } else {
+        updateCountdownDisplay();
+      }
+    }, 250); // 250ms updates for snappier display
+  }
+
+  function stopInternal() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    enableControls(false);
+  }
+
+  function stopTimer() {
+    if (!isRunning) return;
+    // compute remainingMs at moment of stop
+    remainingMs = Math.max(0, endTime - Date.now());
+    stopInternal();
+  }
+
+  function resetTimer() {
+    // reset to inputs' values (do not start)
+    stopInternal();
+    remainingMs = parseInputsToMs();
+    initialMs = remainingMs;
+    updateCountdownDisplay();
+    // allow editing
+    enableControls(false);
+  }
+
+  // small visual when user tries to start with zero
+  function flashZero() {
+    const prev = countDisplay.style.transform;
+    countDisplay.style.transform = 'scale(1.04)';
+    setTimeout(()=> countDisplay.style.transform = prev, 160);
+  }
+
+  // --- Alarm (Web Audio API) ---
+  let audioCtx = null;
+  function fireAlarm() {
+    // create audio context lazily on first use to comply with browser autoplay policies
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = audioCtx;
+      // short tone sequence: three beeps
+      const now = ctx.currentTime;
+      const master = ctx.createGain();
+      master.connect(ctx.destination);
+      master.gain.value = 0.08;
+
+      function beep(at, freq, dur) {
+        const o = ctx.createOscillator();
+        o.type = 'sine';
+        o.frequency.value = freq;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.0, at);
+        g.gain.linearRampToValueAtTime(1.0, at + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.001, at + dur);
+        o.connect(g);
+        g.connect(master);
+        o.start(at);
+        o.stop(at + dur + 0.02);
+      }
+
+      // three descending beeps
+      beep(now, 880, 0.18);
+      beep(now + 0.24, 660, 0.18);
+      beep(now + 0.48, 440, 0.24);
+    } catch (e) {
+      // fallback: alert
+      try { alert('Timer finished!'); } catch (e2) { /* ignore */ }
+    }
+  }
+
+  // --- wiring events ---
+  startBtn.addEventListener('click', startTimer);
+  stopBtn.addEventListener('click', stopTimer);
+  resetBtn.addEventListener('click', resetTimer);
+
+  // sync initial display
+  remainingMs = parseInputsToMs();
+  initialMs = remainingMs;
+  updateCountdownDisplay();
+
+  // tidy: when page visibility lost, keep accurate by recalculating remainingMs if running
+  document.addEventListener('visibilitychange', () => {
+    if (isRunning && endTime) {
+      remainingMs = Math.max(0, endTime - Date.now());
+      updateCountdownDisplay();
+    }
+  });
+
+  // allow pressing Enter in inputs to start timer
+  [minutesInput, secondsInput].forEach(inp => {
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') startTimer();
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
+

@@ -1,0 +1,16 @@
+name: Poster Upload Message
+on:
+  push:  # Trigger this workflow on any push to any branch
+    branches:
+      - '**'   # Matches all branches
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Display success message
+        run: echo "Poster Uploaded Successfully "
+
